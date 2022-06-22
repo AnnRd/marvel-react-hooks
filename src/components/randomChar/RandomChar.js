@@ -7,7 +7,7 @@ import './randomChar.scss';
 import mjolnir from '../../resources/img/mjolnir.png';
 
 const RandomChar = () => {
-    const [character, setCharacter] = useState({});
+    const [character, setCharacter] = useState(null);
     const {loading, error, getCharacter} = useMarvelService();
 
     useEffect(() => {
@@ -25,7 +25,7 @@ const RandomChar = () => {
             .then(onCharLoaded);
     }
 
-        const content = !loading && !error ? <View character={character}/> : null;
+        const content = !loading && !error && character ? <View character={character}/> : null;
         const spinner = loading ? <Spinner/> : null;
         const errorMessage = error? <ErrorMessage/> : null;
 
