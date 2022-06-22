@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect} from 'react';
 import PropTypes from 'prop-types';
 
 import MarvelService from '../../services/MarvelService';
@@ -20,7 +20,7 @@ const CharList = (props) => {
 
     useEffect(() => {
         onRequest(); //при первичной загрузке => аргумента нет и метод ориенируется на _baseOffset в MarvelService
-    }, []); //пустой массив для отслеживания - функция выполнится только один раз -- при создании компонента. useEffect вызыввается после рендера всего
+    }, []); //пустой массив для отслеживания - функция выполнится только один раз -- при создании компонента.Имитация componentDidMount. useEffect вызыввается после рендера всего.
 
     const onRequest = (offset) => {
         onCharListLoading();
@@ -107,9 +107,7 @@ const CharList = (props) => {
                 <div className="inner">load more</div>
             </button>
         </div>
-    )
-    
-    
+    )   
 }
 
 CharList.propTypes = {
