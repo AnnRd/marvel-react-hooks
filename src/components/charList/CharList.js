@@ -16,7 +16,7 @@ const CharList = (props) => {
     const [charListEnd, setCharListEnd] = useState(false);
     const [selected, setSelected] = useState(null); //мое для активного стиля
 
-    const marvelService = new MarvelService();
+    const marvelService = useMarvelService();
 
     useEffect(() => {
         onRequest(); //при первичной загрузке => аргумента нет и метод ориенируется на _baseOffset в MarvelService
