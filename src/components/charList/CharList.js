@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 
 import MarvelService from '../../services/MarvelService';
@@ -7,67 +7,57 @@ import ErrorMessage from '../errorMessage/ErrorMessage';
 
 import './charList.scss';
 
-class CharList extends Component{
-    state = {
-        charList: [],
-        loading: true,
-        error: false,
-        newItemsLoading: false,
-        offset: 210,
-        charListEnd: false,
-        selected: null,
-    };
+const CharList = (props) => {
+    const [charList, setCharList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [newItemsLoading, setNewItemsLoading] = useState(false);
+    const [offset, setOffset] = useState(210);
+    const [charListEnd, setCharListEnd] = useState(false);
+    const [selected, setSelected] = useState(null); //мое для активного стиля
 
-    marvelService = new MarvelService();
+    const marvelService = new MarvelService();
 
-    componentDidMount() {
-        this.onRequest(); //запускается и при первичной загрузке => аргумента нет и метод ориенируется на _baseOffset в MarvelService
-    }
+    useEffect(() => {
+        onRequest(); //при первичной загрузке => аргумента нет и метод ориенируется на _baseOffset в MarvelService
+    }, []); //пустой массив для отслеживания - функция выполнится только один раз -- при создании компонента. useEffect вызыввается после рендера всего
 
-    onRequest = (offset) => {
-        this.onCharListLoading();
+    const onRequest = (offset) => {
+        onCharListLoading();
 
-        this.marvelService
+        marvelService
             .getAllCharacters(offset)
-            .then(this.onCharLoaded)
-            .catch(this.onError)
+            .then(onCharLoaded)
+            .catch(onError)
     }
 
-    onCharListLoading = () => {
-        this.setState({
-            newItemsLoading: true
-        })
+    const onCharListLoading = () => {
+       setNewItemsLoading(true);
     }
 
-    onCharLoaded = (newCharList) => {
+    const onCharLoaded = (newCharList) => {
         let end = false;
         if (newCharList.length < 9) {
             end = true;
         }
 
-        this.setState( ({charList, offset}) => ({
-            charList: [...charList, ...newCharList],  //развернула старый массив персонажей и за ним добавила новый. При первичной загрузке charlist - пустой массив
-            loading: false,
-            newItemsLoading: false,
-            offset: offset + 9,
-            charListEnd: end,
-        }))
+        setCharList(charList => [...charList, ...newCharList]); //развернула старый массив персонажей и за ним добавила новый. При первичной загрузке charlist - пустой массив
+        setLoading(loading => false);
+        setNewItemsLoading(newItemsLoading => false);
+        setOffset(offset => offset + 9);
+        setCharListEnd(charListEnd => end);
     }
 
-    onError = () => {
-        this.setState({
-            loading: false,
-            error: true
-        })
+    const onError = () => {
+        setError(true);
+        setLoading(loading => false);
     }
 
-    handleClick = ()  => {
-        this.setState({
-          selected: this.props.charId
-        })
+    const handleClick = ()  => {
+        setSelected(selected => props.charId);
       }
 
-    renderCharacters(arr) {
+    function renderCharacters(arr) {
         const characters = arr.map( obj => {
             let imgStyle = {'objectFit' : 'cover'};
             if (obj.thumbnail.includes('image_not_available')) {
@@ -78,11 +68,11 @@ class CharList extends Component{
 
             return (
                 <li
-                className={this.props.charId === obj.id ? selectedClass : 'char__item'}
+                className={props.charId === obj.id ? selectedClass : 'char__item'}
                 key={obj.id}
                 onClick={() => {
-                    this.handleClick();
-                    this.props.onCharSelected(obj.id)
+                    handleClick();
+                    props.onCharSelected(obj.id)
                 }}>
                     <img src={obj.thumbnail} alt={obj.name}  style={imgStyle}/>
                     <div className="char__name">{obj.name}</div>
@@ -97,32 +87,28 @@ class CharList extends Component{
             </ul>
         ) //Для центровки спиннера/ошибки
     }
-    
-
-    render() {
-        const {charList, loading, error, newItemsLoading, offset, charListEnd} = this.state;
         
-        const items = this.renderCharacters(charList);
+    const items = renderCharacters(charList);
 
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = !loading && !error ? items : null;
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const spinner = loading ? <Spinner/> : null;
+    const content = !loading && !error ? items : null;
 
-        return (
-            <div className="char__list">
-                    {content}
-                    {spinner}
-                    {errorMessage}
-                <button
-                className="button button__main button__long"
-                disabled={newItemsLoading}
-                style={{'display': charListEnd ? 'none' : 'block'}}
-                onClick={() => {this.onRequest(offset)}}>
-                    <div className="inner">load more</div>
-                </button>
-            </div>
-        )
-    }
+    return (
+        <div className="char__list">
+                {content}
+                {spinner}
+                {errorMessage}
+            <button
+            className="button button__main button__long"
+            disabled={newItemsLoading}
+            style={{'display': charListEnd ? 'none' : 'block'}}
+            onClick={() => {onRequest(offset)}}>
+                <div className="inner">load more</div>
+            </button>
+        </div>
+    )
+    
     
 }
 
