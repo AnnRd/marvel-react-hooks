@@ -9,30 +9,22 @@ import './charList.scss';
 
 const CharList = (props) => {
     const [charList, setCharList] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(false);
     const [newItemsLoading, setNewItemsLoading] = useState(false);
     const [offset, setOffset] = useState(210);
     const [charListEnd, setCharListEnd] = useState(false);
     const [selected, setSelected] = useState(null); //мое для активного стиля
 
-    const marvelService = useMarvelService();
+    const {loading, error, getAllCharacters} = useMarvelService();
 
     useEffect(() => {
-        onRequest(); //при первичной загрузке => аргумента нет и метод ориенируется на _baseOffset в MarvelService
+        onRequest(offset, true);
     }, []); //пустой массив для отслеживания - функция выполнится только один раз -- при создании компонента.Имитация componentDidMount. useEffect вызыввается после рендера всего.
 
-    const onRequest = (offset) => {
-        onCharListLoading();
+    const onRequest = (offset, initial) => {
+        initial ? setNewItemsLoading(false) : setNewItemsLoading(true); //если initial = true, то загрузка первичная и setNewItemsLoading(false) должно остатьс в false
 
-        marvelService
-            .getAllCharacters(offset)
+        getAllCharacters(offset)
             .then(onCharLoaded)
-            .catch(onError)
-    }
-
-    const onCharListLoading = () => {
-       setNewItemsLoading(true);
     }
 
     const onCharLoaded = (newCharList) => {
@@ -42,15 +34,9 @@ const CharList = (props) => {
         }
 
         setCharList(charList => [...charList, ...newCharList]); //развернула старый массив персонажей и за ним добавила новый. При первичной загрузке charlist - пустой массив
-        setLoading(loading => false);
         setNewItemsLoading(newItemsLoading => false);
         setOffset(offset => offset + 9);
         setCharListEnd(charListEnd => end);
-    }
-
-    const onError = () => {
-        setError(true);
-        setLoading(loading => false);
     }
 
     const handleClick = ()  => {
@@ -91,12 +77,11 @@ const CharList = (props) => {
     const items = renderCharacters(charList);
 
     const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading ? <Spinner/> : null;
-    const content = !loading && !error ? items : null;
+    const spinner = loading && !newItemsLoading ? <Spinner/> : null; //если есть загрузка, но это не загрузка новых персонажей
 
     return (
         <div className="char__list">
-                {content}
+                {items}
                 {spinner}
                 {errorMessage}
             <button

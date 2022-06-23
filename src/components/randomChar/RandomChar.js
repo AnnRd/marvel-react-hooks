@@ -49,8 +49,6 @@ const RandomChar = () => {
                 </div>
             </div>
         )
-      
-
 }
 
 const View = ({character}) => {
