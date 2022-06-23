@@ -8,7 +8,7 @@ import mjolnir from '../../resources/img/mjolnir.png';
 
 const RandomChar = () => {
     const [character, setCharacter] = useState(null);
-    const {loading, error, getCharacter} = useMarvelService();
+    const {loading, error, getCharacter, clearError} = useMarvelService();
 
     useEffect(() => {
         updateChar();
@@ -19,6 +19,7 @@ const RandomChar = () => {
     }
 
     const updateChar = () => {
+        clearError(); //если появилась ошибка, она очистится перед новым запросом
         const id = Math.floor(Math.random() * (1011400 - 1011000) + 1011000); //  * (max - min) + min
 
         getCharacter(id)

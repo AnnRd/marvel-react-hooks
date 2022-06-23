@@ -28,7 +28,7 @@ export const useHttp = () => {
 
     }, []);
 
-    const clearError = useCallback(() => {setError(null)}, []);
+    const clearError = useCallback(() => {setError(null)}, []); //уберет ошибку, которая может появиться из-за отсутствия id персонажа на сервере, чтобы компонент загружал новых
 
     return {loading, request, error, clearError};
 }
