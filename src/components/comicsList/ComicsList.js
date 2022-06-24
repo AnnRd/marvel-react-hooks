@@ -6,31 +6,38 @@ import ErrorMessage from '../errorMessage/ErrorMessage';
 import './comicsList.scss';
 
 const ComicsList = () => {
-    const [comicsItem, setComicsItem] = useState([]);
+    const [comicsList, setComicsList] = useState([]);
+    const [newItemsLoading, setNewItemsLoading] = useState(false);
+    const [offset, setOffset] = useState(0);
+    const [comicsEnd, setComicsEnd] = useState(false);
 
 
     const {loading, error, getComics} = useMarvelService();
 
-    // useEffect(async () => {
-    //     const result = await getComics();
-
-    //     console.log(result);
-    // }, [])
-
     useEffect(() => {
-        getComics().then(onComicsLoaded);
+        onRequest(offset, true);
     }, [])
 
-    const onComicsLoaded = (com) => {
-        setComicsItem(com)
+    const onRequest = (offset, initial) => {
+        initial ? setNewItemsLoading(false) : setNewItemsLoading(true); //если initial = true, то загрузка первичная и setNewItemsLoading(false) должно остатьс в false
+
+        getComics(offset)
+            .then(onComicsListLoaded)
+    }
+
+    const onComicsListLoaded = (newList) => {
+        let end = false;
+        if (newList.length < 8) {
+            end = true;
+        }
+        setComicsList([...comicsList, ...newList]);
+        setNewItemsLoading(false);
+        setOffset(offset + 8);
+        setComicsEnd(end);
     }
 
     const renderComics = (arr) => {
         const comics = arr.map(obj => {
-            // let imgStyle = {'objectFit' : 'cover'};
-            // if (obj.image.includes('image_not_available')) {
-            //     imgStyle = {'objectFit' : 'unset'};
-            // }
 
             return (
                 <li key={obj.id} className="comics__item">
@@ -45,22 +52,26 @@ const ComicsList = () => {
 
         return (
             <ul className="comics__grid">
-            {comics}
+                {comics}
             </ul>
 )
      
     }
 
-   const items = renderComics(comicsItem);
+   const items = renderComics(comicsList);
    const errorMessage = error ? <ErrorMessage/> : null;
-   const spinner = loading ? <Spinner/> : null;
+   const spinner = loading && !newItemsLoading ? <Spinner/> : null;
 
     return (
         <div className="comics__list">
             {items}
             {spinner}
             {errorMessage}
-            <button className="button button__main button__long">
+            <button
+                className="button button__main button__long"
+                disabled={newItemsLoading}
+                style={{'display' : comicsEnd ? 'none' : 'block'}}
+                onClick={() => onRequest(offset)}>
                 <div className="inner">load more</div>
             </button>
         </div>
