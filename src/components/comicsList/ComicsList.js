@@ -39,7 +39,7 @@ const ComicsList = () => {
     }
 
     const renderComics = (arr) => {
-        const comics = arr.map(obj => {
+        const comics = arr.map((obj, i) => {
 
             return (
                 <li key={obj.id} className="comics__item">
